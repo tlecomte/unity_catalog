@@ -50,12 +50,18 @@ LogicalType UCUtils::TypeToLogicalType(ClientContext &context, const string &typ
 		return LogicalType::BOOLEAN;
 	} else if (type_text == "timestamp") {
 		return LogicalType::TIMESTAMP_TZ;
+	} else if (type_text == "timestamp_ntz") {
+		return LogicalType::TIMESTAMP;
 	} else if (type_text == "binary") {
 		return LogicalType::BLOB;
 	} else if (type_text == "date") {
 		return LogicalType::DATE;
 	} else if (type_text == "void") {
 		return LogicalType::SQLNULL; // TODO: This seems to be the closest match
+	} else if (type_text == "variant") {
+		return LogicalType::VARIANT();
+	} else if (type_text.find("interval") == 0) {
+		return LogicalType::INTERVAL;
 	} else if (type_text.find("decimal(") == 0) {
 		size_t spec_end = type_text.find(')');
 		if (spec_end != string::npos) {
@@ -144,9 +150,11 @@ LogicalType UCUtils::TypeToLogicalType(ClientContext &context, const string &typ
 		}
 	}
 
+	Value type_fallback_val;
+	if (context.TryGetCurrentSetting("uc_type_fallback", type_fallback_val) && type_fallback_val.GetValue<bool>()) {
+		return LogicalType::VARCHAR;
+	}
 	throw NotImplementedException("Tried to fallback to unknown type for '%s'", type_text);
-	// fallback for unknown types
-	return LogicalType::VARCHAR;
 }
 
 LogicalType UCUtils::ToUCType(const LogicalType &input) {
