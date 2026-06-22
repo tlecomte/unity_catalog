@@ -28,7 +28,7 @@ jobs:
   duckdb-stable-deploy:
     name: Deploy extension binaries
     needs: duckdb-stable-build
-    uses: duckdb/extension-ci-tools/.github/workflows/_extension_distribution.yml@main # NOTE: manually update ref :(
+    uses: duckdb/extension-ci-tools/.github/workflows/_extension_deploy.yml@main # NOTE: manually update ref :(
     secrets: inherit
     with:
       extension_name: *ext_name
@@ -41,7 +41,7 @@ jobs:
 
   code-quality-check:
     name: Code Quality Check
-    uses: duckdb/extension-ci-tools/.github/workflows/_extension_deploy.yml@main # NOTE: manually update ref :(
+    uses: duckdb/extension-ci-tools/.github/workflows/_extension_code_quality.yml@main # NOTE: manually update ref :(
     with:
       extension_name: *ext_name
       duckdb_version: *duckdb_ref
