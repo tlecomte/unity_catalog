@@ -14,7 +14,6 @@
 #include "storage/uc_schema_entry.hpp"
 #include "duckdb/parser/parser.hpp"
 #include "duckdb/planner/tableref/bound_at_clause.hpp"
-#include "duckdb/main/secret/secret_manager.hpp"
 
 namespace duckdb {
 
@@ -85,27 +84,8 @@ void TableInformation::RefreshCredentials(ClientContext &context) {
 	if (table_data->storage_location.find("file://") == 0) {
 		return;
 	}
-	auto &secret_manager = SecretManager::Get(context);
-	// Get Credentials from UCAPI
-	auto table_credentials = UCAPI::GetTableCredentials(
-	    context, table_data->table_id, !(catalog.access_mode == AccessMode::READ_ONLY), catalog.credentials);
-
-	// Inject secret into secret manager scoped to this path
-	CreateSecretInput input;
-	input.on_conflict = OnCreateConflict::REPLACE_ON_CONFLICT;
-	input.persist_type = SecretPersistType::TEMPORARY;
-	input.name = "__internal_uc_" + table_data->table_id;
-	input.type = "s3";
-	input.provider = "config";
-	input.options = {
-	    {"key_id", table_credentials.key_id},
-	    {"secret", table_credentials.secret},
-	    {"session_token", table_credentials.session_token},
-	    {"region", catalog.credentials.aws_region},
-	};
-	input.scope = {table_data->storage_location};
-
-	secret_manager.CreateSecret(context, input);
+	catalog.credential_manager->EnsureTableCredentials(context, table_data->table_id, table_data->storage_location,
+		                                          	   !(catalog.access_mode == AccessMode::READ_ONLY), catalog.credentials);
 }
 
 string TableInformation::AttachedCatalogName() const {
