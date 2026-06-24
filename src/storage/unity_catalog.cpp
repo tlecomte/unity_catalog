@@ -8,7 +8,7 @@
 #include "duckdb/storage/database_size.hpp"
 #include "storage/uc_schema_entry.hpp"
 #include "storage/uc_transaction.hpp"
-#include "duckdb/main/secret/secret_manager.hpp"
+#include "uc_utils.hpp"
 
 namespace duckdb {
 
@@ -16,7 +16,7 @@ UnityCatalog::UnityCatalog(AttachedDatabase &db_p, const string &internal_name, 
                            UCCredentials credentials, const string &default_schema, string catalog_name_p)
     : Catalog(db_p), internal_name(internal_name), access_mode(attach_options.access_mode),
       credentials(std::move(credentials)), catalog_name(std::move(catalog_name_p)), schemas(*this),
-      default_schema(default_schema) {
+      default_schema(default_schema), credential_manager(make_uniq<UCTableCredentialManager>()) {
 }
 
 UnityCatalog::~UnityCatalog() = default;

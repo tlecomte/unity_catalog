@@ -192,6 +192,9 @@ static void LoadInternal(ExtensionLoader &loader) {
 	// Also register the (deprecated) alias
 	StorageExtension::Register(config, "uc_catalog", extension);
 
+	config.AddExtensionOption("uc_type_fallback", "Fallback to VARCHAR for unknown types inside unity catalog schemas",
+	                          LogicalType::BOOLEAN, Value::BOOLEAN(true));
+
 	// Register table checkpoint functions
 	loader.RegisterFunction(UCCheckpointTableFunction());
 	loader.RegisterFunction(UCForceCheckpointTableFunction());

@@ -284,6 +284,11 @@ UCAPITableCredentials UCAPI::GetTableCredentials(ClientContext &ctx, const strin
 		result.session_token = TryGetStrFromObject(aws_temp_credentials, "session_token");
 	}
 
+	// Parse expiration_time if available (works for AWS credentials)
+	// API returns expiration_time as Unix epoch timestamp in milliseconds
+	uint64_t expiration_ms = TryGetNumFromObject(root, "expiration_time", false, 0);
+	result.expiration_time = expiration_ms; // Store in milliseconds for direct comparison
+
 	return result;
 }
 
